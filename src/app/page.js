@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Hero from '../components/Hero';
 import CategoriesTabs from '../components/CategoriesTabs';
-import BrandGrid from '../components/BrandGrid';
 import ProductGrid from '../components/ProductGrid';
 import { useApp } from '../context/AppContext';
 
@@ -16,7 +15,7 @@ export default function Home() {
     setActiveTab(tabId);
     setActiveCategory(categoryName);
     setSearchQuery(''); // Clear general search query when selecting a specific category
-    
+
     // Smooth scroll down to products grid
     const productsSection = document.getElementById('products-section');
     if (productsSection) {
@@ -47,20 +46,14 @@ export default function Home() {
       <Hero />
 
       {/* Categories Tabs Section */}
-      <CategoriesTabs 
+      <CategoriesTabs
         onSelectCategory={handleSelectCategory}
-        onSelectBrand={handleSelectBrand}
-      />
-
-
-      {/* Brand Grid Section */}
-      <BrandGrid 
         onSelectBrand={handleSelectBrand}
       />
 
       {/* Products Display Section */}
       <div id="products-section" className="scroll-mt-20">
-        <ProductGrid 
+        <ProductGrid
           activeTab={activeTab}
           activeCategory={activeCategory}
           onClearFilter={handleClearFilters}

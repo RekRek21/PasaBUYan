@@ -66,7 +66,7 @@ export default function LocationModal({ isOpen, onClose, onSelectAddress }) {
               ))}
               {filteredLocations.length === 0 && (
                 <div className="text-center py-6 text-sm text-gray-400">
-                  No locations found matching "{search}"
+                  No locations found matching &quot;{search}&quot;
                 </div>
               )}
             </div>

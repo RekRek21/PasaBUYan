@@ -27,7 +27,7 @@ export default function Header({
           </button>
 
           <Link href="/" className="block">
-            <span className="text-xl font-extrabold tracking-tighter text-brandTeal">pasa<span className="text-black">BUY</span>an</span>
+            <span className="text-xl font-extrabold tracking-tighter text-brandTeal">pasa<span className="text-gray-600">BUY</span>an</span>
           </Link>
         </div>
 
