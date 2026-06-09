@@ -1,34 +1,75 @@
+'use client';
+
 import ProductCard from './ProductCard';
+import { useApp } from '../context/AppContext';
 
-const DUMMY_PRODUCTS = [
-  { id: 1, name: 'Minimalist Desk Lamp', price: 89.00, category: 'Lighting', imageUrl: null },
-  { id: 2, name: 'Ceramic Coffee Mug', price: 24.00, category: 'Drinkware', imageUrl: null },
-  { id: 3, name: 'Linen Throw Blanket', price: 115.00, category: 'Home', imageUrl: null },
-  { id: 4, name: 'Concrete Planter', price: 45.00, category: 'Decor', imageUrl: null },
-  { id: 5, name: 'Leather Notebook', price: 32.00, category: 'Stationery', imageUrl: null },
-  { id: 6, name: 'Matte Black Pen', price: 18.00, category: 'Stationery', imageUrl: null },
-  { id: 7, name: 'Oak Wall Shelf', price: 150.00, category: 'Furniture', imageUrl: null },
-  { id: 8, name: 'Glass Water Bottle', price: 28.00, category: 'Drinkware', imageUrl: null },
-];
+export default function ProductGrid({ activeTab, activeCategory, onClearFilter }) {
+  const { searchQuery, products, isAdmin, deleteCatalogProduct } = useApp();
 
-export default function ProductGrid() {
+  // Filter products by tab, selected category, and search query
+  const filteredProducts = products.filter(product => {
+    // 1. Filter by search query if present
+    if (searchQuery) {
+      return product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+             product.store.toLowerCase().includes(searchQuery.toLowerCase());
+    }
+
+    // 2. Filter by selected category (takes priority)
+    if (activeCategory) {
+      return product.category === activeCategory;
+    }
+
+    // 3. Fallback to active tab
+    return product.type === activeTab;
+  });
+
   return (
-    <section className="py-16 container mx-auto px-4">
+    <section className="py-8 container mx-auto px-4 border-t border-gray-100 mt-6">
+      
+      {/* Title */}
       <div className="flex items-end justify-between mb-8">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight mb-2">New Arrivals</h2>
-          <p className="text-secondary">Discover our latest minimal collections.</p>
+          <h2 className="text-xl font-extrabold text-gray-800 tracking-tight">
+            {searchQuery 
+              ? `Search Results for "${searchQuery}"` 
+              : activeCategory 
+                ? activeCategory 
+                : 'Recommended for You'}
+          </h2>
+          <p className="text-xs text-gray-400 mt-1">
+            {searchQuery 
+              ? `Found ${filteredProducts.length} items`
+              : `Explore items from our verified stores`}
+          </p>
         </div>
-        <a href="/products" className="text-sm font-medium hover:underline underline-offset-4 hidden sm:block">
-          View All Products
-        </a>
+        
+        {/* Clear filter action */}
+        {(activeCategory || searchQuery) && (
+          <button 
+            onClick={onClearFilter}
+            className="text-xs font-bold text-brandTeal hover:underline"
+          >
+            Clear Filters
+          </button>
+        )}
       </div>
-      
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-10">
-        {DUMMY_PRODUCTS.map(product => (
+
+      {/* Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {filteredProducts.map((product) => (
           <ProductCard key={product.id} {...product} />
         ))}
       </div>
+
+      {/* Empty State */}
+      {filteredProducts.length === 0 && (
+        <div className="text-center py-16 bg-white rounded-2xl border border-gray-50 max-w-md mx-auto my-8">
+          <span className="text-4xl">🔍</span>
+          <h3 className="text-base font-bold text-gray-700 mt-4">No Products Found</h3>
+          <p className="text-xs text-gray-400 mt-1">Try refining your search terms or choosing another category.</p>
+        </div>
+      )}
+
     </section>
   );
 }

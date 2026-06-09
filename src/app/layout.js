@@ -1,21 +1,21 @@
 import "./globals.css";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+import { AppProvider } from "../context/AppContext";
+import ClientLayout from "../components/ClientLayout";
 
 export const metadata = {
-  title: "PasaBUYan | Minimalist Essentials",
-  description: "Curated collections designed to bring minimalism, functionality, and beauty into your daily routines.",
+  title: "PasaBUYan | Grocery, Food & Shops Delivery App",
+  description: "Order groceries, meals, pantry essentials, and boutique items with PasaBUYan on-demand delivery.",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer />
+        <AppProvider>
+          <ClientLayout>
+            {children}
+          </ClientLayout>
+        </AppProvider>
       </body>
     </html>
   );

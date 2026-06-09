@@ -10,9 +10,12 @@ module.exports = {
       colors: {
         background: '#fcfcfc',
         foreground: '#171717',
-        primary: '#000000',
+        primary: '#e78821', // Custom warm orange/yellow accent
         secondary: '#666666',
         border: '#eaeaea',
+        brandTeal: '#e78821', // Map brandTeal to the new accent color
+        brandYellow: '#FFDC00',
+        brandRed: '#FF4D6D',
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
