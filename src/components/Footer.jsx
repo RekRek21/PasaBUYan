@@ -2,18 +2,17 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-t border-gray-100 pt-16 pb-0 mt-16">
+    <footer className="bg-white border-t border-gray-100 pt-16 pb-0 mt-16 print:hidden">
       <div className="container mx-auto px-4">
 
         {/* Top Branding Section */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mb-12 items-start">
           <div className="md:col-span-4">
             <Link href="/" className="inline-block mb-4">
-              <span className="text-2xl font-black tracking-tighter text-brandTeal">pasa<span className="text-black">BUYan</span></span>
-            </Link>
+              <span className="text-xl font-extrabold tracking-tighter text-brandTeal">pasa<span className="text-gray-600">BUY</span>an</span>            </Link>
             <h4 className="text-base font-extrabold text-gray-800 mb-2">Your one-stop online delivery companion</h4>
             <p className="text-sm text-gray-500 max-w-sm leading-relaxed">
-              Order groceries, meals, pantry essentials, gadgets, and boutique gifts from PasaBUYan and get them delivered to your doorstep in one hour.
+              Order groceries from PasaBUYan and get them delivered directly to your doorstep.
             </p>
           </div>
 
@@ -39,8 +38,8 @@ export default function Footer() {
             <div>
               <h5 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Discover</h5>
               <ul className="space-y-2.5 text-sm text-gray-600 font-medium">
-                <li><Link href="#" className="hover:text-brandTeal transition-colors">Groceries</Link></li>
-                <li><Link href="#" className="hover:text-brandTeal transition-colors">Stores</Link></li>
+                <li><Link href="/shop" className="hover:text-brandTeal transition-colors">Groceries</Link></li>
+                <li><Link href="/shop" className="hover:text-brandTeal transition-colors">Stores</Link></li>
               </ul>
             </div>
 

@@ -16,19 +16,9 @@ export default function SidebarMenu({ isOpen, onClose }) {
       setExpandedSection(section);
     }
   };
-
-  const menuCategories = {
-    groceries: {
-      title: 'Stores',
-      items: [
-        { name: 'S&R - Circuit Makati', desc: 'Membership Shopping' },
-        { name: 'Landmark - Makati', desc: 'Supermarket' },
-        { name: 'Robinsons Supermarket', desc: 'Supermarket' },
-        { name: 'The Marketplace', desc: 'Premium Grocery' },
-        { name: 'Shopwise - Sta. Rosa', desc: 'Hypermarket' }
-      ]
-    },
-  };
+  const storesList = [
+    { name: 'S&R Membership Shopping, General Trias Cavite', desc: 'Membership Shopping' }
+  ];
 
   return (
     <div className="fixed inset-0 z-[120] flex justify-start bg-black/60 backdrop-blur-sm animate-fade-in">
@@ -153,38 +143,19 @@ export default function SidebarMenu({ isOpen, onClose }) {
 
           <hr className="border-gray-100" />
 
-          {/* Browse Categories */}
+          {/* Browse Stores */}
           <div>
             <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider block mb-3">Browse Stores</span>
-            <div className="space-y-2">
-              {Object.entries(menuCategories).map(([key, section]) => {
-                const isExpanded = expandedSection === key;
-                return (
-                  <div key={key} className="border border-gray-100 rounded-xl overflow-hidden">
-                    <button
-                      onClick={() => toggleSection(key)}
-                      className={`w-full flex items-center justify-between px-4 py-3 text-sm font-bold text-left transition-colors ${isExpanded ? 'bg-gray-50/50 text-brandTeal' : 'text-gray-700 hover:bg-gray-50/50'
-                        }`}
-                    >
-                      <span>{section.title}</span>
-                      {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                    </button>
-                    {isExpanded && (
-                      <div className="bg-gray-50/30 px-4 py-2 border-t border-gray-50 divide-y divide-gray-100">
-                        {section.items.map((item, idx) => (
-                          <div key={idx} className="py-2 hover:text-brandTeal cursor-pointer" onClick={() => {
-                            alert(`Navigate to ${item.name}`);
-                            onClose();
-                          }}>
-                            <p className="text-xs font-semibold text-gray-700 hover:text-brandTeal">{item.name}</p>
-                            {item.desc && <p className="text-[10px] text-gray-400 mt-0.5">{item.desc}</p>}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+            <div className="bg-gray-50/30 rounded-xl border border-gray-100 divide-y divide-gray-100 overflow-hidden">
+              {storesList.map((item, idx) => (
+                <div key={idx} className="px-4 py-3 hover:bg-white cursor-pointer transition-colors group" onClick={() => {
+                  alert(`Navigate to ${item.name}`);
+                  onClose();
+                }}>
+                  <p className="text-xs font-semibold text-gray-700 group-hover:text-brandTeal transition-colors">{item.name}</p>
+                  {item.desc && <p className="text-[10px] text-gray-400 mt-0.5">{item.desc}</p>}
+                </div>
+              ))}
             </div>
           </div>
 

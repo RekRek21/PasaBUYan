@@ -21,7 +21,6 @@ export default function AddProductPage() {
   const [image, setImage] = useState('');
   const [category, setCategory] = useState('Grocery & Markets');
   const [store, setStore] = useState('S&R - Circuit Makati');
-  const [type, setType] = useState('grocery');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -30,7 +29,6 @@ export default function AddProductPage() {
   const [fileName, setFileName] = useState('');
   const [importError, setImportError] = useState('');
   const [importStore, setImportStore] = useState('S&R - Circuit Makati');
-  const [importType, setImportType] = useState('grocery');
   const [importSuccess, setImportSuccess] = useState(false);
   const [importLoading, setImportLoading] = useState(false);
 
@@ -57,7 +55,6 @@ export default function AddProductPage() {
       price: parseFloat(price),
       category,
       store,
-      type,
       image: image || DEFAULT_IMAGE
     };
     addCatalogProduct(newProduct);
@@ -107,17 +104,19 @@ export default function AddProductPage() {
             return '';
           };
 
+          const productStore = findCol(['store', 'merchant', 'vendor', 'shop']) || '';
           const productName = findCol(['product name', 'product_name', 'name', 'item', 'product']) || '';
           const productPrice = findCol(['price', 'cost', 'amount']) || 0;
+          const productImage = findCol(['image url', 'image_url', 'image', 'img', 'photo', 'url', 'picture']) || '';
           const productCategory = findCol(['category', 'cat', 'type']) || 'Grocery & Markets';
-          const productImage = findCol(['image', 'img', 'photo', 'url', 'picture']) || '';
 
           return {
             _rowIndex: idx + 1,
+            store: String(productStore).trim(),
             name: String(productName).trim(),
             price: parseFloat(productPrice) || 0,
-            category: String(productCategory).trim() || 'Grocery & Markets',
             image: String(productImage).trim(),
+            category: String(productCategory).trim() || 'Grocery & Markets',
             valid: String(productName).trim().length > 0 && (parseFloat(productPrice) > 0)
           };
         });
@@ -151,8 +150,7 @@ export default function AddProductPage() {
           name: row.name,
           price: row.price,
           category: row.category,
-          store: importStore,
-          type: importType,
+          store: row.store || importStore,
           image: row.image || DEFAULT_IMAGE
         });
       });
@@ -169,13 +167,13 @@ export default function AddProductPage() {
   // ─── Download Template ─────────────────────────────────────
   const handleDownloadTemplate = () => {
     const templateData = [
-      { 'Product Name': 'Sample Cookies (250g)', 'Price': 199, 'Category': 'Grocery & Markets', 'Image': 'https://example.com/cookies.jpg' },
-      { 'Product Name': 'Organic Olive Oil 500ml', 'Price': 450, 'Category': 'Specialty Grocery', 'Image': '' },
-      { 'Product Name': 'Premium Face Serum', 'Price': 899, 'Category': 'Beauty & Personal Care', 'Image': '' }
+      { 'Store Name': 'S&R - Circuit Makati', 'Product Name': 'Sample Cookies (250g)', 'Price': 199, 'Image URL': 'https://example.com/cookies.jpg', 'Category': 'Grocery & Markets' },
+      { 'Store Name': 'The Marketplace', 'Product Name': 'Organic Olive Oil 500ml', 'Price': 450, 'Image URL': '', 'Category': 'Specialty Grocery' },
+      { 'Store Name': 'Catchy Beauty PH', 'Product Name': 'Premium Face Serum', 'Price': 899, 'Image URL': '', 'Category': 'Beauty & Personal Care' }
     ];
     const ws = XLSX.utils.json_to_sheet(templateData);
     // Set column widths
-    ws['!cols'] = [{ wch: 30 }, { wch: 10 }, { wch: 25 }, { wch: 45 }];
+    ws['!cols'] = [{ wch: 25 }, { wch: 30 }, { wch: 10 }, { wch: 45 }, { wch: 25 }];
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Products');
     XLSX.writeFile(wb, 'pasabuyan_product_template.xlsx');
@@ -301,18 +299,7 @@ export default function AddProductPage() {
                   />
                 </div>
 
-                {/* Type */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-black text-gray-700 uppercase tracking-wider">Catalog Section (Type)</label>
-                  <select
-                    value={type}
-                    onChange={(e) => setType(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brandTeal focus:bg-white transition-all text-gray-700 font-medium"
-                  >
-                    <option value="grocery">Grocery (Stores tab)</option>
-                    <option value="shops">Shops (Boutiques/Brands)</option>
-                  </select>
-                </div>
+
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -324,26 +311,19 @@ export default function AddProductPage() {
                     onChange={(e) => setCategory(e.target.value)}
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brandTeal focus:bg-white transition-all text-gray-700 font-medium"
                   >
-                    {type === 'grocery' ? (
-                      <>
-                        <option value="Grocery & Markets">Grocery & Markets</option>
-                        <option value="Specialty Grocery">Specialty Grocery</option>
-                        <option value="Fresh Goods">Fresh Goods</option>
-                        <option value="Alcohol">Alcohol</option>
-                        <option value="Frozen & Ready to Heat">Frozen & Ready to Heat</option>
-                        <option value="Meat & Deli">Meat & Deli</option>
-                        <option value="Organic">Organic</option>
-                      </>
-                    ) : (
-                      <>
-                        <option value="Home & Kitchen">Home & Kitchen</option>
-                        <option value="Lifestyle & Variety">Lifestyle & Variety</option>
-                        <option value="Beauty & Personal Care">Beauty & Personal Care</option>
-                        <option value="Pet Care">Pet Care</option>
-                        <option value="Flowers & Plants">Flowers & Plants</option>
-                        <option value="Gadgets & Electronics">Gadgets & Electronics</option>
-                      </>
-                    )}
+                    <option value="Grocery & Markets">Grocery & Markets</option>
+                    <option value="Specialty Grocery">Specialty Grocery</option>
+                    <option value="Fresh Goods">Fresh Goods</option>
+                    <option value="Alcohol">Alcohol</option>
+                    <option value="Frozen & Ready to Heat">Frozen & Ready to Heat</option>
+                    <option value="Meat & Deli">Meat & Deli</option>
+                    <option value="Organic">Organic</option>
+                    <option value="Home & Kitchen">Home & Kitchen</option>
+                    <option value="Lifestyle & Variety">Lifestyle & Variety</option>
+                    <option value="Beauty & Personal Care">Beauty & Personal Care</option>
+                    <option value="Pet Care">Pet Care</option>
+                    <option value="Flowers & Plants">Flowers & Plants</option>
+                    <option value="Gadgets & Electronics">Gadgets & Electronics</option>
                   </select>
                 </div>
 
@@ -355,23 +335,16 @@ export default function AddProductPage() {
                     onChange={(e) => setStore(e.target.value)}
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brandTeal focus:bg-white transition-all text-gray-700 font-medium"
                   >
-                    {type === 'grocery' ? (
-                      <>
-                        <option value="S&R - Circuit Makati">S&R - Circuit Makati</option>
-                        <option value="Landmark - Makati">Landmark - Makati</option>
-                        <option value="Robinsons Supermarket">Robinsons Supermarket</option>
-                        <option value="The Marketplace">The Marketplace</option>
-                        <option value="Shopwise - Sta. Rosa">Shopwise - Sta. Rosa</option>
-                      </>
-                    ) : (
-                      <>
-                        <option value="Big Scoop">Big Scoop</option>
-                        <option value="Drypers">Drypers</option>
-                        <option value="Big Box PH">Big Box PH</option>
-                        <option value="Catchy Beauty PH">Catchy Beauty PH</option>
-                        <option value="Summer Vibes Cafe">Summer Vibes Cafe</option>
-                      </>
-                    )}
+                    <option value="S&R - Circuit Makati">S&R - Circuit Makati</option>
+                    <option value="Landmark - Makati">Landmark - Makati</option>
+                    <option value="Robinsons Supermarket">Robinsons Supermarket</option>
+                    <option value="The Marketplace">The Marketplace</option>
+                    <option value="Shopwise - Sta. Rosa">Shopwise - Sta. Rosa</option>
+                    <option value="Big Scoop">Big Scoop</option>
+                    <option value="Drypers">Drypers</option>
+                    <option value="Big Box PH">Big Box PH</option>
+                    <option value="Catchy Beauty PH">Catchy Beauty PH</option>
+                    <option value="Summer Vibes Cafe">Summer Vibes Cafe</option>
                   </select>
                 </div>
               </div>
@@ -448,7 +421,7 @@ export default function AddProductPage() {
                 Upload an <strong>.xlsx</strong> or <strong>.xls</strong> file with the following columns (in order):
               </p>
               <div className="flex flex-wrap gap-2 mt-1">
-                {['Product Name', 'Price', 'Category', 'Image'].map((col, i) => (
+                {['Store Name', 'Product Name', 'Price', 'Image URL', 'Category'].map((col, i) => (
                   <span key={i} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white text-blue-700 text-[10px] font-bold border border-blue-100 shadow-sm">
                     <span className="w-4 h-4 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-[9px] font-black">{i + 1}</span>
                     {col}
@@ -470,36 +443,24 @@ export default function AddProductPage() {
               </button>
             </div>
 
-            {/* Default Store & Type for imported rows */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-black text-gray-700 uppercase tracking-wider">Default Store (all rows)</label>
-                <select
-                  value={importStore}
-                  onChange={(e) => setImportStore(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brandTeal focus:bg-white transition-all text-gray-700 font-medium"
-                >
-                  <option value="S&R - Circuit Makati">S&R - Circuit Makati</option>
-                  <option value="Landmark - Makati">Landmark - Makati</option>
-                  <option value="Robinsons Supermarket">Robinsons Supermarket</option>
-                  <option value="The Marketplace">The Marketplace</option>
-                  <option value="Shopwise - Sta. Rosa">Shopwise - Sta. Rosa</option>
-                  <option value="Big Scoop">Big Scoop</option>
-                  <option value="Big Box PH">Big Box PH</option>
-                  <option value="Catchy Beauty PH">Catchy Beauty PH</option>
-                </select>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-black text-gray-700 uppercase tracking-wider">Catalog Section</label>
-                <select
-                  value={importType}
-                  onChange={(e) => setImportType(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brandTeal focus:bg-white transition-all text-gray-700 font-medium"
-                >
-                  <option value="grocery">Grocery</option>
-                  <option value="shops">Shops</option>
-                </select>
-              </div>
+            {/* Default Store for imported rows */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-black text-gray-700 uppercase tracking-wider">Default Store (all rows)</label>
+              <select
+                value={importStore}
+                onChange={(e) => setImportStore(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brandTeal focus:bg-white transition-all text-gray-700 font-medium"
+              >
+                <option value="S&R - Circuit Makati">S&R - Circuit Makati</option>
+                <option value="Landmark - Makati">Landmark - Makati</option>
+                <option value="Robinsons Supermarket">Robinsons Supermarket</option>
+                <option value="The Marketplace">The Marketplace</option>
+                <option value="Shopwise - Sta. Rosa">Shopwise - Sta. Rosa</option>
+                <option value="Big Scoop">Big Scoop</option>
+                <option value="Big Box PH">Big Box PH</option>
+                <option value="Catchy Beauty PH">Catchy Beauty PH</option>
+                <option value="Summer Vibes Cafe">Summer Vibes Cafe</option>
+              </select>
             </div>
 
             {/* Upload Zone */}
@@ -573,6 +534,7 @@ export default function AddProductPage() {
                       <thead>
                         <tr className="bg-gray-50 border-b border-gray-100">
                           <th className="px-4 py-3 text-[10px] font-black text-gray-500 uppercase tracking-wider w-8">#</th>
+                          <th className="px-4 py-3 text-[10px] font-black text-gray-500 uppercase tracking-wider">Store Name</th>
                           <th className="px-4 py-3 text-[10px] font-black text-gray-500 uppercase tracking-wider">Product Name</th>
                           <th className="px-4 py-3 text-[10px] font-black text-gray-500 uppercase tracking-wider">Price</th>
                           <th className="px-4 py-3 text-[10px] font-black text-gray-500 uppercase tracking-wider">Category</th>
@@ -585,6 +547,7 @@ export default function AddProductPage() {
                         {importedRows.map((row) => (
                           <tr key={row._rowIndex} className={`transition-colors ${row.valid ? 'hover:bg-gray-50/50' : 'bg-red-50/30'}`}>
                             <td className="px-4 py-3 text-[10px] font-bold text-gray-400">{row._rowIndex}</td>
+                            <td className="px-4 py-3 text-xs font-medium text-gray-600 max-w-[120px] truncate">{row.store || <span className="text-gray-400 italic">Default</span>}</td>
                             <td className="px-4 py-3 text-xs font-semibold text-gray-700 max-w-[180px] truncate">{row.name || <span className="text-red-400 italic">Missing</span>}</td>
                             <td className="px-4 py-3 text-xs font-bold text-gray-700">{row.price > 0 ? `₱${row.price.toLocaleString()}` : <span className="text-red-400 italic">Invalid</span>}</td>
                             <td className="px-4 py-3 text-[10px] font-medium text-gray-500 max-w-[120px] truncate">{row.category}</td>

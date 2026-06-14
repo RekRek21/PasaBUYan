@@ -5,12 +5,14 @@ import Footer from './Footer';
 import SidebarMenu from './SidebarMenu';
 import LocationModal from './LocationModal';
 import CartDrawer from './CartDrawer';
+import Toast from './Toast';
 import { useApp } from '../context/AppContext';
 
 export default function ClientLayout({ children }) {
   const {
     selectedLocation,
     setSelectedLocation,
+    addRecentLocation,
     cartItems,
     updateCartQuantity,
     removeFromCart,
@@ -65,7 +67,10 @@ export default function ClientLayout({ children }) {
       <LocationModal 
         isOpen={locationOpen}
         onClose={() => setLocationOpen(false)}
-        onSelectAddress={setSelectedLocation}
+        onSelectAddress={(loc) => {
+          setSelectedLocation(loc);
+          addRecentLocation(loc);
+        }}
       />
 
       {/* Cart Drawer */}
@@ -84,6 +89,8 @@ export default function ClientLayout({ children }) {
 
       {/* Global Footer */}
       <Footer />
+
+      <Toast />
     </div>
   );
 }

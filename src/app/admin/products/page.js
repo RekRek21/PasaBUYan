@@ -9,7 +9,6 @@ export default function AllProductsPage() {
   const { products, isAdmin, setIsAdmin, deleteCatalogProduct, clearAllProducts, updateCatalogProduct } = useApp();
 
   const [search, setSearch] = useState('');
-  const [filterType, setFilterType] = useState('all');
   const [filterCategory, setFilterCategory] = useState('all');
   const [viewMode, setViewMode] = useState('table'); // 'table' or 'grid'
   const [sortBy, setSortBy] = useState('name-asc');
@@ -26,11 +25,6 @@ export default function AllProductsPage() {
   // Filter + Search + Sort
   const filtered = useMemo(() => {
     let result = [...products];
-
-    // Type filter
-    if (filterType !== 'all') {
-      result = result.filter(p => p.type === filterType);
-    }
 
     // Category filter
     if (filterCategory !== 'all') {
@@ -66,7 +60,7 @@ export default function AllProductsPage() {
     }
 
     return result;
-  }, [products, filterType, filterCategory, search, sortBy]);
+  }, [products, filterCategory, search, sortBy]);
 
   const handleDelete = (product) => {
     if (confirm(`Delete "${product.name}" from the catalog?`)) {
@@ -116,9 +110,6 @@ export default function AllProductsPage() {
     );
   }
 
-  const groceryCount = products.filter(p => p.type === 'grocery').length;
-  const shopsCount = products.filter(p => p.type === 'shops').length;
-
   return (
     <div className="container mx-auto px-4 py-12 max-w-6xl relative">
       {/* Back */}
@@ -142,7 +133,7 @@ export default function AllProductsPage() {
               <div>
                 <h1 className="text-lg font-extrabold text-gray-800 tracking-tight">All Products</h1>
                 <p className="text-[11px] text-gray-400 mt-0.5">
-                  {products.length} total — {groceryCount} grocery, {shopsCount} shops
+                  {products.length} total products in the catalog
                 </p>
               </div>
             </div>
@@ -175,18 +166,14 @@ export default function AllProductsPage() {
           </div>
 
           {/* Stats Row */}
-          <div className="grid grid-cols-3 gap-3 mt-6">
+          <div className="grid grid-cols-2 gap-3 mt-6">
             <div className="bg-gray-50 rounded-xl p-3 text-center">
               <span className="text-lg font-extrabold text-gray-800">{products.length}</span>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">Total</p>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">Total Products</p>
             </div>
             <div className="bg-emerald-50/50 rounded-xl p-3 text-center">
-              <span className="text-lg font-extrabold text-emerald-600">{groceryCount}</span>
-              <p className="text-[10px] font-bold text-emerald-500/60 uppercase tracking-wider mt-0.5">Grocery</p>
-            </div>
-            <div className="bg-violet-50/50 rounded-xl p-3 text-center">
-              <span className="text-lg font-extrabold text-violet-600">{shopsCount}</span>
-              <p className="text-[10px] font-bold text-violet-500/60 uppercase tracking-wider mt-0.5">Shops</p>
+              <span className="text-lg font-extrabold text-emerald-600">{allCategories.length}</span>
+              <p className="text-[10px] font-bold text-emerald-500/60 uppercase tracking-wider mt-0.5">Categories</p>
             </div>
           </div>
         </div>
@@ -205,19 +192,7 @@ export default function AllProductsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
           </div>
 
-          {/* Filters */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[11px] focus:outline-none focus:border-brandTeal focus:bg-white transition-all text-gray-600 font-bold"
-            >
-              <option value="all">All Types</option>
-              <option value="grocery">Grocery</option>
-              <option value="shops">Shops</option>
-            </select>
-
-            <select
+          <div className="flex items-center gap-2 flex-wrap">            <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
               className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[11px] focus:outline-none focus:border-brandTeal focus:bg-white transition-all text-gray-600 font-bold max-w-[180px]"
@@ -280,7 +255,6 @@ export default function AllProductsPage() {
                       <th className="px-4 py-3 text-[10px] font-black text-gray-500 uppercase tracking-wider">Price</th>
                       <th className="px-4 py-3 text-[10px] font-black text-gray-500 uppercase tracking-wider">Category</th>
                       <th className="px-4 py-3 text-[10px] font-black text-gray-500 uppercase tracking-wider">Store</th>
-                      <th className="px-4 py-3 text-[10px] font-black text-gray-500 uppercase tracking-wider">Type</th>
                       <th className="px-4 py-3 w-16"></th>
                     </tr>
                   </thead>
@@ -313,15 +287,6 @@ export default function AllProductsPage() {
                         </td>
                         <td className="px-4 py-3">
                           <span className="text-[10px] font-medium text-gray-500">{product.store || '—'}</span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                            product.type === 'grocery'
-                              ? 'bg-emerald-50 text-emerald-600'
-                              : 'bg-violet-50 text-violet-600'
-                          }`}>
-                            {product.type}
-                          </span>
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -389,13 +354,6 @@ export default function AllProductsPage() {
 
                   {/* Info */}
                   <div className="space-y-1">
-                    <span className={`text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full ${
-                      product.type === 'grocery'
-                        ? 'bg-emerald-50 text-emerald-600'
-                        : 'bg-violet-50 text-violet-600'
-                    }`}>
-                      {product.type}
-                    </span>
                     <h4 className="text-xs font-bold text-gray-700 line-clamp-2 leading-tight group-hover:text-brandTeal transition-colors">{product.name}</h4>
                     <p className="text-[10px] text-gray-400 truncate">{product.store || '—'}</p>
                     <div className="flex items-center justify-between pt-1.5 border-t border-gray-50 mt-1.5">
@@ -494,27 +452,14 @@ export default function AllProductsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-gray-600 uppercase tracking-wider">Store</label>
-                    <input
-                      type="text"
-                      value={editingProduct.store || ''}
-                      onChange={(e) => setEditingProduct({...editingProduct, store: e.target.value})}
-                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-gray-700 font-medium"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-gray-600 uppercase tracking-wider">Type</label>
-                    <select
-                      value={editingProduct.type}
-                      onChange={(e) => setEditingProduct({...editingProduct, type: e.target.value})}
-                      className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-gray-700 font-medium"
-                    >
-                      <option value="grocery">Grocery</option>
-                      <option value="shops">Shops</option>
-                    </select>
-                  </div>
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-black text-gray-600 uppercase tracking-wider">Store</label>
+                  <input
+                    type="text"
+                    value={editingProduct.store || ''}
+                    onChange={(e) => setEditingProduct({...editingProduct, store: e.target.value})}
+                    className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-gray-700 font-medium"
+                  />
                 </div>
               </form>
             </div>

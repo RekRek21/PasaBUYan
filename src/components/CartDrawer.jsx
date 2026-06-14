@@ -1,6 +1,11 @@
 import { X, Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useApp } from '../context/AppContext';
 
 export default function CartDrawer({ isOpen, onClose, cartItems, onUpdateQuantity, onRemoveItem }) {
+  const router = useRouter();
+  const { deliveryFee, serviceFee } = useApp();
+
   if (!isOpen) return null;
 
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
@@ -61,7 +66,7 @@ export default function CartDrawer({ isOpen, onClose, cartItems, onUpdateQuantit
                 <div className="flex-1 flex flex-col justify-between min-w-0">
                   <div>
                     <h4 className="text-sm font-bold text-gray-800 truncate">{item.name}</h4>
-                    <p className="text-xs text-gray-400 mt-0.5">{item.store || 'PasaBUYan'}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{item.store || 'S&R Membership Shopping, General Trias Cavite'}</p>
                   </div>
 
                   <div className="flex items-center justify-between mt-2">
@@ -105,10 +110,26 @@ export default function CartDrawer({ isOpen, onClose, cartItems, onUpdateQuantit
               <span className="text-sm font-medium text-gray-500">Subtotal</span>
               <span className="text-xl font-extrabold text-gray-800">₱{subtotal.toLocaleString()}</span>
             </div>
-            <p className="text-xs text-gray-400 mb-4">Taxes and delivery fee will be calculated at checkout.</p>
+            <div className="space-y-2 mb-4">
+              <p className="text-xs text-gray-400 flex justify-between">
+                <span>Delivery Fee</span>
+                <span className="font-bold text-gray-600">₱{deliveryFee.toLocaleString()}</span>
+              </p>
+              <p className="text-xs text-gray-400 flex justify-between">
+                <span>Service Fee</span>
+                <span className="font-bold text-gray-600">₱{serviceFee.toLocaleString()}</span>
+              </p>
+            </div>
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
+              <span className="text-sm font-bold text-gray-800">Total</span>
+              <span className="text-2xl font-black text-brandTeal">₱{(subtotal + deliveryFee + serviceFee).toLocaleString()}</span>
+            </div>
             <button 
-              onClick={() => alert('Checkout flow simulated!')}
-              className="w-full py-3.5 bg-brandTeal text-white font-bold text-sm rounded-xl hover:bg-brandTeal/90 transition-all active:scale-[0.98] shadow-md shadow-brandTeal/10 text-center block"
+              onClick={() => {
+                onClose();
+                router.push('/checkout');
+              }}
+              className="w-full flex items-center justify-center py-4 bg-brandTeal text-white font-extrabold text-sm rounded-xl hover:bg-brandTeal/90 transition-all active:scale-[0.98] shadow-md shadow-brandTeal/20"
             >
               Proceed to Checkout
             </button>

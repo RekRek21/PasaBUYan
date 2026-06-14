@@ -7,12 +7,10 @@ import ProductGrid from '../components/ProductGrid';
 import { useApp } from '../context/AppContext';
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState('grocery');
   const [activeCategory, setActiveCategory] = useState(null);
   const { setSearchQuery } = useApp();
 
-  const handleSelectCategory = (categoryName, tabId) => {
-    setActiveTab(tabId);
+  const handleSelectCategory = (categoryName) => {
     setActiveCategory(categoryName);
     setSearchQuery(''); // Clear general search query when selecting a specific category
 
@@ -23,8 +21,7 @@ export default function Home() {
     }
   };
 
-  const handleSelectBrand = (brandName, tabId) => {
-    setActiveTab(tabId);
+  const handleSelectBrand = (brandName) => {
     setActiveCategory(null);
     setSearchQuery(brandName);
 
@@ -54,7 +51,6 @@ export default function Home() {
       {/* Products Display Section */}
       <div id="products-section" className="scroll-mt-20">
         <ProductGrid
-          activeTab={activeTab}
           activeCategory={activeCategory}
           onClearFilter={handleClearFilters}
         />

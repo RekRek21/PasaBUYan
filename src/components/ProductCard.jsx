@@ -12,7 +12,7 @@ export default function ProductCard({ id, name, price, category, imageUrl, image
       id,
       name,
       price,
-      store: store || 'PasaBUYan',
+      store: store || 'S&R Membership Shopping, General Trias Cavite',
       image: imageUrl || image
     });
   };
@@ -40,8 +40,7 @@ export default function ProductCard({ id, name, price, category, imageUrl, image
       )}
       
       <Link 
-        href={`#`} 
-        onClick={(e) => e.preventDefault()}
+        href={`/product/${id}`} 
         className="relative aspect-square overflow-hidden bg-gray-50 rounded-xl mb-1 flex items-center justify-center text-3xl select-none"
       >
         <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity z-10" />
@@ -60,12 +59,14 @@ export default function ProductCard({ id, name, price, category, imageUrl, image
       
       <div className="flex flex-col gap-1 px-1">
         <div className="text-[10px] font-black text-brandTeal uppercase tracking-wider">{category}</div>
-        <h4 className="font-bold text-xs text-gray-800 line-clamp-1">
-          {name}
-        </h4>
-        <div className="text-[10px] text-gray-400 font-medium truncate mb-1">{store || 'PasaBUYan'}</div>
+        <Link href={`/product/${id}`} className="hover:text-brandTeal transition-colors">
+          <h4 className="font-bold text-xs text-gray-800 line-clamp-1">
+            {name}
+          </h4>
+        </Link>
+        <div className="text-[10px] text-gray-400 font-medium truncate mb-1">{store || 'S&R Membership Shopping, General Trias Cavite'}</div>
         <div className="flex items-center justify-between mt-1 pt-2 border-t border-gray-50">
-          <span className="font-extrabold text-sm text-gray-800">₱{price.toLocaleString()}</span>
+          <span className="font-extrabold text-sm text-gray-800">₱{(price || 0).toLocaleString()}</span>
           <button 
             onClick={handleAddToCart}
             className="p-2 rounded-xl bg-brandTeal text-white hover:bg-brandTeal/90 transition-all active:scale-90 shadow-sm"

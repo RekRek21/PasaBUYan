@@ -1,47 +1,16 @@
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Store, Star, Clock } from 'lucide-react';
 
 export default function CategoriesTabs({ onSelectCategory, onSelectBrand }) {
-  const [activeTab, setActiveTab] = useState('grocery');
-
-  const tabData = [
-    { id: 'grocery', label: 'Stores', icon: Store },
-  ];
+  const router = useRouter();
 
   const trendingStores = [
     {
-      name: 'S&R - Circuit Makati',
+      name: 'S&R Membership Shopping, General Trias Cavite',
       image: 'https://media.pickaroo.com/media/thumb/merchant_logos/2020/11/13/9QVAtk6tkskQ2X2i5aHyEk_size_400.jpg',
       rating: 4.8,
       deliveryTime: '45-60 mins',
-      tag: 'Supermarket'
-    },
-    {
-      name: 'Landmark - Makati',
-      image: 'https://media.pickaroo.com/media/thumb/merchant_logos/2021/6/2/GArJEpZokwYeC3Em67JqAA_size_400.jpg',
-      rating: 4.7,
-      deliveryTime: '45-60 mins',
-      tag: 'Supermarket'
-    },
-    {
-      name: 'Robinsons Supermarket',
-      image: 'https://media.pickaroo.com/media/thumb/merchant_logos/2020/11/19/fyLtWDN5YCo5bK5a7TJG5T_size_400.jpg',
-      rating: 4.6,
-      deliveryTime: '45-60 mins',
-      tag: 'Supermarket'
-    },
-    {
-      name: 'The Marketplace',
-      image: 'https://media.pickaroo.com/media/thumb/merchant_logos/2021/9/6/jZr24Lq4QesPrDcVy6D8F6_size_400.jpg',
-      rating: 4.9,
-      deliveryTime: '30-45 mins',
-      tag: 'Premium Grocery'
-    },
-    {
-      name: 'Shopwise - Sta. Rosa',
-      image: 'https://media.pickaroo.com/media/thumb/merchant_logos/2022/6/3/MNcCisbfkpBM6Jd7kcA3Br_size_400.jpg',
-      rating: 4.5,
-      deliveryTime: '60-75 mins',
       tag: 'Supermarket'
     }
   ];
@@ -49,28 +18,13 @@ export default function CategoriesTabs({ onSelectCategory, onSelectBrand }) {
   return (
     <div className="container mx-auto px-4 py-8">
 
-      {/* Category Tabs Header */}
+      {/* Category Header */}
       <div className="flex justify-center border-b border-gray-100 mb-8 max-w-lg mx-auto">
-        {tabData.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-2 py-4 text-sm font-bold border-b-2 transition-all duration-300 relative ${isActive
-                ? 'border-brandTeal text-brandTeal scale-[1.03]'
-                : 'border-transparent text-gray-400 hover:text-gray-600 hover:border-gray-200'
-                }`}
-            >
-              <Icon className="w-4 h-4" />
-              <span>{tab.label}</span>
-              {isActive && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brandTeal animate-fade-in" />
-              )}
-            </button>
-          );
-        })}
+        <h2 className="py-4 text-sm font-bold text-gray-800 flex items-center gap-2 relative">
+          <Store className="w-4 h-4 text-brandTeal" />
+          <span>Stores</span>
+          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-brandTeal" />
+        </h2>
       </div>
 
       {/* Stores Grid Section */}
@@ -78,7 +32,7 @@ export default function CategoriesTabs({ onSelectCategory, onSelectBrand }) {
         {trendingStores.map((store, idx) => (
           <div
             key={idx}
-            onClick={() => onSelectBrand && onSelectBrand(store.name, 'grocery')}
+            onClick={() => router.push(`/shop?store=${encodeURIComponent(store.name)}`)}
             className="flex items-center gap-3.5 p-3.5 rounded-2xl border border-gray-100 hover:border-brandTeal/30 hover:shadow-lg hover:shadow-brandTeal/5 bg-white cursor-pointer transition-all duration-300 group hover:-translate-y-0.5"
           >
             {/* Store Logo */}

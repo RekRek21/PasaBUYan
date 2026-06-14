@@ -1,68 +1,108 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
+import Fuse from 'fuse.js';
+import { useSearchParams } from 'next/navigation';
 import { useApp } from '../../context/AppContext';
-import { Search, SlidersHorizontal, ShoppingCart, ChevronDown, X, ArrowLeft } from 'lucide-react';
+import { Search, SlidersHorizontal, ShoppingCart, ChevronDown, X, ArrowLeft, ChevronUp } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ShopPage() {
   const { products, addToCart } = useApp();
+  const searchParams = useSearchParams();
 
-  const [search, setSearch] = useState('');
-  const [filterType, setFilterType] = useState('all');
+  const [search, setSearch] = useState(searchParams.get('q') || '');
   const [filterCategory, setFilterCategory] = useState('all');
+  const [filterStore, setFilterStore] = useState('all');
   const [sortBy, setSortBy] = useState('name-asc');
   const [showFilters, setShowFilters] = useState(false);
+
+  // Sync URL params into state — wait for products to load so store names are available
+  useEffect(() => {
+    const q = searchParams.get('q');
+    const store = searchParams.get('store');
+    if (q) setSearch(q);
+    if (store && products.length > 0) {
+      // Find the exact store name from product data (case-insensitive match)
+      const allProductStores = [...new Set(products.map(p => p.store).filter(Boolean))];
+      const exactMatch = allProductStores.find(
+        s => s.toLowerCase().trim() === store.toLowerCase().trim()
+              || s.toLowerCase().includes(store.toLowerCase().trim())
+              || store.toLowerCase().includes(s.toLowerCase().trim())
+      );
+      // Use the exact product store name so the <select> dropdown highlights it
+      setFilterStore(exactMatch || store);
+    }
+  }, [searchParams, products]);
 
   // Derive unique categories
   const allCategories = useMemo(() => {
     let cats = products.map(p => p.category);
-    if (filterType !== 'all') {
-      cats = products.filter(p => p.type === filterType).map(p => p.category);
-    }
     return Array.from(new Set(cats)).sort();
-  }, [products, filterType]);
+  }, [products]);
+
+  // Derive unique stores
+  const allStores = useMemo(() => {
+    let stores = products.map(p => p.store || 'S&R Membership Shopping, General Trias Cavite');
+    return Array.from(new Set(stores)).sort();
+  }, [products]);
+
+  // Fuse.js instance for fuzzy searching
+  const fuse = useMemo(() => new Fuse(products, {
+    keys: ['name', 'store', 'category'],
+    threshold: 0.35,
+    minMatchCharLength: 2,
+    ignoreLocation: true,
+  }), [products]);
 
   // Filter + Search + Sort
   const filtered = useMemo(() => {
     let result = [...products];
 
-    if (filterType !== 'all') {
-      result = result.filter(p => p.type === filterType);
-    }
     if (filterCategory !== 'all') {
       result = result.filter(p => p.category === filterCategory);
     }
+    if (filterStore !== 'all') {
+      const normalizedFilter = filterStore.toLowerCase().trim();
+      result = result.filter(p => {
+        const storeName = (p.store || '').toLowerCase().trim();
+        return storeName === normalizedFilter || storeName.includes(normalizedFilter) || normalizedFilter.includes(storeName);
+      });
+    }
     if (search.trim()) {
-      const q = search.toLowerCase();
-      result = result.filter(p =>
-        p.name.toLowerCase().includes(q) ||
-        p.store?.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q)
-      );
+      // Fuzzy search on the already-filtered subset
+      const subFuse = new Fuse(result, {
+        keys: ['name', 'store', 'category'],
+        threshold: 0.35,
+        minMatchCharLength: 2,
+        ignoreLocation: true,
+      });
+      result = subFuse.search(search.trim()).map(r => r.item);
     }
 
-    switch (sortBy) {
-      case 'name-asc': result.sort((a, b) => a.name.localeCompare(b.name)); break;
-      case 'name-desc': result.sort((a, b) => b.name.localeCompare(a.name)); break;
-      case 'price-asc': result.sort((a, b) => a.price - b.price); break;
-      case 'price-desc': result.sort((a, b) => b.price - a.price); break;
+    if (!search.trim()) {
+      switch (sortBy) {
+        case 'name-asc': result.sort((a, b) => a.name.localeCompare(b.name)); break;
+        case 'name-desc': result.sort((a, b) => b.name.localeCompare(a.name)); break;
+        case 'price-asc': result.sort((a, b) => (a.price || 0) - (b.price || 0)); break;
+        case 'price-desc': result.sort((a, b) => (b.price || 0) - (a.price || 0)); break;
+      }
     }
 
     return result;
-  }, [products, filterType, filterCategory, search, sortBy]);
+  }, [products, filterCategory, filterStore, search, sortBy, fuse]);
 
   const handleAddToCart = (product) => {
     addToCart({
       id: product.id,
       name: product.name,
       price: product.price,
-      store: product.store || 'PasaBUYan',
+      store: product.store || 'S&R Membership Shopping, General Trias Cavite',
       image: product.image
     });
   };
 
-  const activeFilterCount = [filterType !== 'all', filterCategory !== 'all', search.trim().length > 0].filter(Boolean).length;
+  const activeFilterCount = [filterCategory !== 'all', filterStore !== 'all', search.trim().length > 0].filter(Boolean).length;
 
   return (
     <div className="bg-gray-50/30 min-h-screen">
@@ -108,26 +148,6 @@ export default function ShopPage() {
 
         {/* ── Filter Bar ───────────────────────────────────── */}
         <div className="flex flex-wrap items-center gap-3 mb-8">
-          {/* Type pills */}
-          <div className="flex bg-white border border-gray-100 rounded-xl p-1 shadow-sm">
-            {[
-              { value: 'all', label: 'All' },
-              { value: 'grocery', label: 'Grocery' },
-              { value: 'shops', label: 'Shops' }
-            ].map(opt => (
-              <button
-                key={opt.value}
-                onClick={() => { setFilterType(opt.value); setFilterCategory('all'); }}
-                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${
-                  filterType === opt.value
-                    ? 'bg-brandTeal text-white shadow-sm'
-                    : 'text-gray-500 hover:text-gray-700'
-                }`}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
 
           {/* Category dropdown */}
           <div className="relative">
@@ -139,6 +159,21 @@ export default function ShopPage() {
               <option value="all">All Categories</option>
               {allCategories.map(cat => (
                 <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+          </div>
+
+          {/* Store dropdown */}
+          <div className="relative">
+            <select
+              value={filterStore}
+              onChange={(e) => setFilterStore(e.target.value)}
+              className="appearance-none pl-4 pr-9 py-2.5 bg-white border border-gray-100 rounded-xl text-xs font-bold text-gray-600 focus:outline-none focus:border-brandTeal transition-all shadow-sm cursor-pointer"
+            >
+              <option value="all">All Stores</option>
+              {allStores.map(store => (
+                <option key={store} value={store}>{store}</option>
               ))}
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
@@ -162,7 +197,7 @@ export default function ShopPage() {
           {/* Active filter count + clear */}
           {activeFilterCount > 0 && (
             <button
-              onClick={() => { setSearch(''); setFilterType('all'); setFilterCategory('all'); }}
+              onClick={() => { setSearch(''); setFilterCategory('all'); setFilterStore('all'); }}
               className="text-[10px] font-bold text-brandTeal hover:underline transition-colors"
             >
               Clear filters ({activeFilterCount})
@@ -182,7 +217,7 @@ export default function ShopPage() {
             <h3 className="text-sm font-bold text-gray-600 mt-5">No products found</h3>
             <p className="text-[11px] text-gray-400 mt-1.5 max-w-xs mx-auto">Try adjusting your search or filters to discover what you&apos;re looking for.</p>
             <button
-              onClick={() => { setSearch(''); setFilterType('all'); setFilterCategory('all'); }}
+              onClick={() => { setSearch(''); setFilterCategory('all'); setFilterStore('all'); }}
               className="mt-5 px-5 py-2.5 bg-brandTeal text-white text-xs font-bold rounded-xl hover:bg-brandTeal/90 transition-all"
             >
               Reset Filters
@@ -190,13 +225,13 @@ export default function ShopPage() {
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
-            {filtered.map((product) => (
+            {filtered.map((product, index) => (
               <div
-                key={product.id}
+                key={product.id || `fallback-${index}`}
                 className="group flex flex-col bg-white rounded-2xl border border-gray-100 hover:border-brandTeal/30 hover:shadow-lg hover:shadow-brandTeal/5 transition-all duration-300 overflow-hidden"
               >
                 {/* Image */}
-                <div className="relative aspect-square bg-gray-50 overflow-hidden">
+                <Link href={`/product/${product.id}`} className="relative aspect-square bg-gray-50 overflow-hidden block">
                   <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity z-10" />
                   {product.image ? (
                     <img
@@ -208,28 +243,21 @@ export default function ShopPage() {
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-300 text-3xl">📦</div>
                   )}
-
-                  {/* Type badge */}
-                  <span className={`absolute top-2.5 left-2.5 text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full backdrop-blur-sm z-20 ${
-                    product.type === 'grocery'
-                      ? 'bg-emerald-500/80 text-white'
-                      : 'bg-violet-500/80 text-white'
-                  }`}>
-                    {product.type}
-                  </span>
-                </div>
+                </Link>
 
                 {/* Info */}
                 <div className="flex flex-col flex-1 p-3.5 gap-1.5">
                   <span className="text-[9px] font-black text-brandTeal uppercase tracking-wider">{product.category}</span>
-                  <h4 className="text-xs font-bold text-gray-800 line-clamp-2 leading-snug group-hover:text-brandTeal transition-colors">
-                    {product.name}
-                  </h4>
-                  <p className="text-[10px] text-gray-400 font-medium truncate">{product.store || 'PasaBUYan'}</p>
+                  <Link href={`/product/${product.id}`}>
+                    <h4 className="text-xs font-bold text-gray-800 line-clamp-2 leading-snug group-hover:text-brandTeal transition-colors">
+                      {product.name}
+                    </h4>
+                  </Link>
+                  <p className="text-[10px] text-gray-400 font-medium truncate">{product.store || 'S&R Membership Shopping, General Trias Cavite'}</p>
 
                   {/* Price + Cart */}
                   <div className="flex items-center justify-between mt-auto pt-2.5 border-t border-gray-50">
-                    <span className="font-extrabold text-sm text-gray-800">₱{product.price.toLocaleString()}</span>
+                    <span className="font-extrabold text-sm text-gray-800">₱{(product.price || 0).toLocaleString()}</span>
                     <button
                       onClick={() => handleAddToCart(product)}
                       className="p-2.5 rounded-xl bg-brandTeal text-white hover:bg-brandTeal/90 transition-all active:scale-90 shadow-sm"
@@ -244,6 +272,15 @@ export default function ShopPage() {
           </div>
         )}
       </div>
+
+      {/* Back to Top Button */}
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className="fixed bottom-8 right-8 z-50 p-3 bg-gray-900 text-white rounded-2xl shadow-xl shadow-gray-900/20 hover:bg-brandTeal transition-all duration-300 opacity-100 translate-y-0"
+        aria-label="Back to top"
+      >
+        <ChevronUp className="w-5 h-5" />
+      </button>
     </div>
   );
 }

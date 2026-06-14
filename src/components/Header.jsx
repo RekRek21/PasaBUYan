@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import { ShoppingCart, Search, Menu, MapPin, ChevronDown, Smartphone } from 'lucide-react';
 
 export default function Header({
@@ -10,8 +11,25 @@ export default function Header({
   searchQuery,
   onSearchChange
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const handleSearchSubmit = (e) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      if (pathname !== '/shop') {
+        router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+      }
+    }
+  };
+
+  const handleSearchIconClick = () => {
+    if (searchQuery.trim() && pathname !== '/shop') {
+      router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   return (
-    <header className="sticky top-0 z-50 w-full bg-white shadow-sm transition-all border-b border-gray-100">
+    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transition-all duration-300 print:hidden">
 
       {/* Main Header Row */}
       <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
@@ -50,9 +68,12 @@ export default function Header({
             placeholder="what do you want?"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
+            onKeyDown={handleSearchSubmit}
             className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brandTeal focus:bg-white transition-all text-gray-700 font-medium"
           />
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <button onClick={handleSearchIconClick}>
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 hover:text-brandTeal transition-colors cursor-pointer" />
+          </button>
         </div>
 
         {/* Right: Actions */}
@@ -78,6 +99,14 @@ export default function Header({
           >
             Log in
           </button>
+
+          {/* Orders Link */}
+          <Link
+            href="/orders"
+            className="hidden md:block text-sm font-bold text-gray-700 hover:text-brandTeal transition-colors px-3 py-2 rounded-xl"
+          >
+            Orders
+          </Link>
 
           {/* Shop All Link */}
           <Link
